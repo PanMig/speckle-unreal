@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "EditorUtilityWidget.h"
 #include "Modules/ModuleInterface.h"
 #include "LevelEditor.h"
 #include "SlateBasics.h"
@@ -14,6 +16,7 @@ class FSpeckleUnrealEditorModule : public IModuleInterface
 {
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+	TSharedRef<SDockTab> SpawnDockableTab(const FSpawnTabArgs& TabSpawnArgs);
 
 	// static inline FSpeckleUnrealEditorModule& Get() {
 	// 	return FModuleManager::LoadModuleChecked<FSpeckleUnrealEditorModule>("SpeckleUnrealEditor");
