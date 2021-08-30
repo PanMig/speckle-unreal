@@ -15,9 +15,10 @@ FSlateFontInfo TextStyle = FCoreStyle::Get().GetFontStyle("EmbossedText");
 
 void SpecklePanel::Construct(const FArguments& InArgs)
 {
-	Init();
-
 	TextStyle.Size = 12.0f;
+	
+	Init();
+	
 	TArray<TSharedPtr<FString>> SpeckleManagerNames;
 	for (auto SM : SpeckleManagers)
 	{
@@ -25,7 +26,7 @@ void SpecklePanel::Construct(const FArguments& InArgs)
 	}
 
 	auto StreamID = FString(TEXT("Stream: Unspecified"));
-	if(CurrentSpeckleManager != nullptr)
+	if(CurrentSpeckleManager)
 	{
 		StreamID = FString(CurrentSpeckleManager->StreamID);		
 	}
@@ -87,7 +88,6 @@ void SpecklePanel::Construct(const FArguments& InArgs)
 
 FReply SpecklePanel::ReceiveButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Import clicked"));
 	return FReply::Handled();
 }
 
@@ -135,16 +135,19 @@ TSharedRef<SWidget> SpecklePanel::HorizontalActionsPanel()
 void SpecklePanel::Init()
 {
 	const auto EditorWorld = GEditor->GetEditorWorldContext().World();
-
-	for(TActorIterator<ASpeckleUnrealManager> It(EditorWorld); It; ++It)
+	if(EditorWorld)
 	{
-		SpeckleManagers.Add(*It);
-	}
+		for(TActorIterator<ASpeckleUnrealManager> It(EditorWorld); It; ++It)
+		{
+			SpeckleManagers.Add(*It);
+		}
 
-	if(SpeckleManagers.Num() > 0)
-	{
-		CurrentSpeckleManager = SpeckleManagers[0];
+		if(SpeckleManagers.Num() > 0)
+		{
+			CurrentSpeckleManager = SpeckleManagers[0];
+		}
 	}
+	
 }
 
 #undef LOCTEXT_NAMESPACE

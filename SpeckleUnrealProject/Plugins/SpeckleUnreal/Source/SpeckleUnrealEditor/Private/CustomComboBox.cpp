@@ -3,8 +3,7 @@
 void SCustomComboBox::Construct(const FArguments& InArgs)
 {
 	ComboOptions = InArgs._ComboOptions;
-	
-	CurrentItem = ComboOptions[0];
+	ComboOptions.Num() > 0 ? CurrentItem = ComboOptions[0] : CurrentItem = MakeShareable(new FString("No available Speckle Managers"));
  
 	ChildSlot
     [
