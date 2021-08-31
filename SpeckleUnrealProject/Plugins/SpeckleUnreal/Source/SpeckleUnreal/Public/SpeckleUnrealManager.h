@@ -24,10 +24,13 @@ class SPECKLEUNREAL_API ASpeckleUnrealManager : public AActor
 {
 	GENERATED_BODY()
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBranchesRequestProcessed, const TArray<FSpeckleBranch>&, BranchesList);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCommitsRequestProcessed, const TArray<FSpeckleCommit>&, CommitsList);	
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStreamsRequestProcessed, const TArray<FSpeckleStream>&, StreamsList);	
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGlobalsRequestProcessed, const FSpeckleGlobals&, GlobalsObject);	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBranchesRequestProcessedDyn, const TArray<FSpeckleBranch>&, BranchesList);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCommitsRequestProcessedDyn, const TArray<FSpeckleCommit>&, CommitsList);	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStreamsRequestProcessedDyn, const TArray<FSpeckleStream>&, StreamsList);	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGlobalsRequestProcessedDyn, const FSpeckleGlobals&, GlobalsObject);	
+	
+	DECLARE_MULTICAST_DELEGATE_OneParam(FBranchesRequestProcessed, const TArray<FSpeckleBranch>&);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FCommitsRequestProcessed, const TArray<FSpeckleCommit>&);
 	
 public:
 	FHttpModule* Http;
@@ -106,13 +109,16 @@ public:
 	void FetchStreamItems(FString PostPayload, TFunction<void(FHttpRequestPtr, FHttpResponsePtr , bool)> HandleResponse);
 
 	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
+	FBranchesRequestProcessedDyn OnBranchesProcessedDynamic;
+	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
+	FCommitsRequestProcessedDyn OnCommitsProcessedDynamic;
+	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
+	FStreamsRequestProcessedDyn OnStreamsProcessedDynamic;
+	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
+	FGlobalsRequestProcessedDyn OnGlobalsProcessedDynamic;
+
 	FBranchesRequestProcessed OnBranchesProcessed;
-	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
 	FCommitsRequestProcessed OnCommitsProcessed;
-	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
-	FStreamsRequestProcessed OnStreamsProcessed;
-	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
-	FGlobalsRequestProcessed OnGlobalsProcessed;
 	
 protected:
 

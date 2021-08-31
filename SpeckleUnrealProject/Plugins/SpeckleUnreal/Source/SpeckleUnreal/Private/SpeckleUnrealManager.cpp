@@ -375,6 +375,7 @@ void ASpeckleUnrealManager::OnCommitsItemsResponseReceived(FHttpRequestPtr Reque
 			}
 		}
 	}
+	OnCommitsProcessedDynamic.Broadcast(ArrayOfCommits);
 	OnCommitsProcessed.Broadcast(ArrayOfCommits);
 }
 
@@ -423,6 +424,7 @@ void ASpeckleUnrealManager::OnBranchesItemsResponseReceived(FHttpRequestPtr Requ
 		}
 	}
 
+	OnBranchesProcessedDynamic.Broadcast(ArrayOfBranches);
 	OnBranchesProcessed.Broadcast(ArrayOfBranches);
 }
 
@@ -471,7 +473,7 @@ void ASpeckleUnrealManager::OnStreamItemsResponseReceived(FHttpRequestPtr Reques
 		}
 	}
 
-	OnStreamsProcessed.Broadcast(ArrayOfStreams);
+	OnStreamsProcessedDynamic.Broadcast(ArrayOfStreams);
 }
 
 void ASpeckleUnrealManager::OnGlobalStreamItemsResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response,
@@ -529,7 +531,7 @@ void ASpeckleUnrealManager::OnGlobalStreamItemsResponseReceived(FHttpRequestPtr 
 					auto Lat = GlobalObject->GetNumberField("Latitude");
 					auto Long = GlobalObject->GetNumberField("Longitude");
 					FSpeckleGlobals Global = FSpeckleGlobals(RefObjectID, Region, static_cast<float>(Lat), static_cast<float>(Long));
-					OnGlobalsProcessed.Broadcast(Global);
+					OnGlobalsProcessedDynamic.Broadcast(Global);
 				}
 			}
 		};

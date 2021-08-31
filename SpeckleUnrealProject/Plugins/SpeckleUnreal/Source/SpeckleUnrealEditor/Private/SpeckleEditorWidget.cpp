@@ -48,8 +48,8 @@ void USpeckleEditorWidget::NativeConstruct()
 	//Bind event handlers to fill in the received items.
 	if(CurrentSpeckleManager != nullptr)
 	{
-		CurrentSpeckleManager->OnBranchesProcessed.AddDynamic(this, &USpeckleEditorWidget::SpeckleBranchesReceived);
-		CurrentSpeckleManager->OnCommitsProcessed.AddDynamic(this, &USpeckleEditorWidget::SpeckleCommitsReceived);
+		CurrentSpeckleManager->OnBranchesProcessedDynamic.AddDynamic(this, &USpeckleEditorWidget::SpeckleBranchesReceived);
+		CurrentSpeckleManager->OnCommitsProcessedDynamic.AddDynamic(this, &USpeckleEditorWidget::SpeckleCommitsReceived);
 	}
 	
 	InitUI();
