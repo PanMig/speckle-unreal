@@ -1,12 +1,14 @@
 ﻿#include "SpecklePanel.h"
 
-#include "CustomComboBox.h"
 #include "EngineUtils.h"
 #include "PanelButton.h"
+#include "SpeckleUnreal/Public/SpeckleRESTHandlerComponent.h"
 #include "Engine/World.h"
 #include "SpeckleStyle.h"
-#include "SpeckleUnrealManager.h"
-#include "Chaos/ChaosPerfTest.h"
+#include "Widgets/Layout/SScaleBox.h"
+
+struct FSpeckleBranch;
+struct FSpeckleCommit;
 
 #define LOCTEXT_NAMESPACE "SpecklePanel"
 
@@ -18,18 +20,24 @@ void SpecklePanel::Construct(const FArguments& InArgs)
 	TextStyle.Size = 12.0f;
 	
 	Init();
+	if(CurrentSpeckleManager == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("No available Speckle managers")));
+		return;
+	}
 	
-	TArray<TSharedPtr<FString>> SpeckleManagerNames;
+	// //set delegates
+	CurrentSpeckleManager->OnBranchesProcessed.AddRaw(this, &SpecklePanel::SpeckleBranchesReceived);
+	CurrentSpeckleManager->OnCommitsProcessed.AddRaw(this, &SpecklePanel::SpeckleCommitsReceived);
+	
+	FetchContent();
+
 	for (auto SM : SpeckleManagers)
 	{
-		SpeckleManagerNames.Add(MakeShared<FString>(SM->GetName()));
+		SpeckleManagerNames.Add(MakeShareable(new FString(SM->GetName())));
 	}
 
-	auto StreamID = FString(TEXT("Stream: Unspecified"));
-	if(CurrentSpeckleManager)
-	{
-		StreamID = FString(CurrentSpeckleManager->StreamID);		
-	}
+	const auto StreamID = FString(CurrentSpeckleManager->StreamID);		
 	
 	ChildSlot
     [
@@ -74,8 +82,15 @@ void SpecklePanel::Construct(const FArguments& InArgs)
 		.VAlign(VAlign_Top)
         .Padding(10)
         [
-			SNew(SCustomComboBox)
-			.ComboOptions(SpeckleManagerNames)
+			SNew(SBox)
+            .WidthOverride(140)
+            .HeightOverride(40)
+            [
+        		SAssignNew(ManagersCBox, STextComboBox)
+				.OptionsSource(&SpeckleManagerNames)
+				.OnSelectionChanged(this, &SpecklePanel::OnSpeckleManagersDropdownChanged)
+				.InitiallySelectedItem(SpeckleManagerNames[0])
+        	]
         ]
 		
 		+ SScrollBox::Slot()
@@ -86,35 +101,49 @@ void SpecklePanel::Construct(const FArguments& InArgs)
     ];
 }
 
+SpecklePanel::~SpecklePanel()
+{
+	if(CurrentSpeckleManager == nullptr) return;
+	CurrentSpeckleManager->OnBranchesProcessed.Clear();
+	CurrentSpeckleManager->OnCommitsProcessed.Clear();
+}
+
 FReply SpecklePanel::ReceiveButtonClicked()
 {
+	SpeckleRestHandlerComp->ImportSpeckleObject(CommitsCBoxContent.Find(CommitsCBox->GetSelectedItem()));
 	return FReply::Handled();
 }
 
 TSharedRef<SWidget> SpecklePanel::HorizontalActionsPanel()
-{	
-	TArray<TSharedPtr<FString>> Options;
-	Options.Add(MakeShareable(new FString("Option1")));
-	Options.Add(MakeShareable(new FString("Option2")));
-	Options.Add(MakeShareable(new FString("Option3")));
-	
+{		
 	auto HorizontalPanel = SNew(SOverlay)
-    +SOverlay::Slot()
-    .HAlign(EHorizontalAlignment::HAlign_Left)
-    .VAlign(EVerticalAlignment::VAlign_Fill)
+	+SOverlay::Slot()
+	.HAlign(EHorizontalAlignment::HAlign_Left)
+	.VAlign(EVerticalAlignment::VAlign_Fill)
 	.Padding(FMargin(10,10,50,10))
-    [
-		 SNew(SCustomComboBox)
-		.ComboOptions(Options)
-    ]
+	[
+		SNew(SBox)
+        .WidthOverride(80)
+        .HeightOverride(32)
+        [
+        	SAssignNew(BranchesCBox, STextComboBox)
+			.OptionsSource(&BranchesCBoxContent)
+			.OnSelectionChanged(this, &SpecklePanel::OnBranchesDropdownChanged)
+        ]
+	]
 
 	+SOverlay::Slot()
     .HAlign(EHorizontalAlignment::HAlign_Left)
     .VAlign(EVerticalAlignment::VAlign_Fill)
 	.Padding(FMargin(100,10,50,10))
     [
-		SNew(SCustomComboBox)
-		.ComboOptions(Options)
+	    SNew(SBox)
+	    .WidthOverride(80)
+	    .HeightOverride(32)
+	    [
+			SAssignNew(CommitsCBox, STextComboBox)
+			.OptionsSource(&CommitsCBoxContent)
+	    ]
     ]
 	
     +SOverlay::Slot()
@@ -132,11 +161,28 @@ TSharedRef<SWidget> SpecklePanel::HorizontalActionsPanel()
 	return HorizontalPanel;
 }
 
+void SpecklePanel::OnSpeckleManagersDropdownChanged(TSharedPtr<FString> SelectedName, ESelectInfo::Type InSelectionInfo)
+{
+	// Early out if the new selection is the same as the old one
+	check(SelectedName != nullptr);
+
+	const int32 Idx = SpeckleManagerNames.Find(SelectedName);
+	CurrentSpeckleManager = SpeckleManagers[Idx];
+	SpeckleRestHandlerComp = CurrentSpeckleManager->FindComponentByClass<USpeckleRESTHandlerComponent>();
+}
+
+void SpecklePanel::OnBranchesDropdownChanged(TSharedPtr<FString> SelectedName, ESelectInfo::Type InSelectionInfo)
+{
+	SelectedBranch = SelectedName;
+	SpeckleRestHandlerComp->FetchListOfCommits(*SelectedBranch.Get());
+}
+
 void SpecklePanel::Init()
 {
 	const auto EditorWorld = GEditor->GetEditorWorldContext().World();
 	if(EditorWorld)
 	{
+		//find all speckle managers in editor scene
 		for(TActorIterator<ASpeckleUnrealManager> It(EditorWorld); It; ++It)
 		{
 			SpeckleManagers.Add(*It);
@@ -144,10 +190,47 @@ void SpecklePanel::Init()
 
 		if(SpeckleManagers.Num() > 0)
 		{
+			//set speckleManager and component for REST calls
 			CurrentSpeckleManager = SpeckleManagers[0];
+			SpeckleRestHandlerComp = CurrentSpeckleManager->FindComponentByClass<USpeckleRESTHandlerComponent>();
+
+			SelectedBranch = MakeShareable(new FString("main"));
 		}
 	}
 	
+}
+
+void SpecklePanel::FetchContent() const
+{
+	check(SpeckleRestHandlerComp != nullptr)
+	if(SpeckleRestHandlerComp == nullptr) return;
+
+	SpeckleRestHandlerComp->FetchListOfBranches();
+	
+	check(SelectedBranch != nullptr)
+	SpeckleRestHandlerComp->FetchListOfCommits(*SelectedBranch.Get());
+}
+
+void SpecklePanel::SpeckleBranchesReceived(const TArray<FSpeckleBranch>& BranchesList)
+{
+	BranchesCBoxContent.Empty();
+	for(auto B : BranchesList)
+	{
+		BranchesCBoxContent.Add(MakeShareable(new FString(B.Name)));
+	}
+	BranchesCBox->RefreshOptions();
+}
+
+void SpecklePanel::SpeckleCommitsReceived(const TArray<FSpeckleCommit>& CommitsList)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%d"), CommitsList.Num());
+	CommitsCBoxContent.Empty();		
+	for(auto C : CommitsList)
+	{
+		CommitsCBoxContent.Add(MakeShareable(new FString(C.Message + " [" + C.AuthorName + "]")));
+	}
+
+	CommitsCBox->RefreshOptions();
 }
 
 #undef LOCTEXT_NAMESPACE

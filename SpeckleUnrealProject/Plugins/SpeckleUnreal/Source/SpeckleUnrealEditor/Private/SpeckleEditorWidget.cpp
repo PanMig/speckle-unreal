@@ -5,7 +5,6 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/ComboBoxString.h"
 #include "Components/TextBlock.h"
-#include "ObjectEditorUtils.h"
 #include "Async/Async.h"
 #include "SpeckleUnreal/Public/SpeckleUnrealManager.h"
 

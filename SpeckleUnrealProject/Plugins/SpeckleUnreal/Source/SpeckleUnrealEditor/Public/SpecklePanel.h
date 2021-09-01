@@ -1,7 +1,11 @@
 ﻿#pragma once
-#include "CustomComboBox.h"
 
-class ASpeckleUnrealManager;
+#include "SpeckleUnreal/Public/SpeckleStructs.h"
+#include "SpeckleUnreal/Public/SpeckleUnrealManager.h"
+#include "SpeckleUnreal/Public/SpeckleRESTHandlerComponent.h"
+
+struct FSpeckleBranch;
+struct FSpeckleCommit;
 
 class SpecklePanel : public SCompoundWidget
 {
@@ -11,13 +15,15 @@ public:
 	SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs);
+	~SpecklePanel();
 
 private:
-	FReply ReceiveButtonClicked();
 	
+	//UI helper functions
 	TSharedRef<SWidget> HorizontalActionsPanel();
 
 	void Init();
+	void FetchContent() const;
 	
 	template<typename T>
 	UFUNCTION(BlueprintCallable)
@@ -30,15 +36,31 @@ private:
 	}
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ASpeckleUnrealManager> SpeckleManagerClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ASpeckleUnrealManager* CurrentSpeckleManager;
 
 	UPROPERTY()
 	TArray<ASpeckleUnrealManager*> SpeckleManagers;
-	
-	// TSharedRef<SWidget> BranchesCBox;
-	// TSharedRef<SWidget> CommitsCBox;
-	// TSharedRef<SWidget> ManagersCBox;
+
+	UPROPERTY()
+	USpeckleRESTHandlerComponent* SpeckleRestHandlerComp;
+
+	void SpeckleBranchesReceived(const TArray<FSpeckleBranch>& BranchesList);
+	void SpeckleCommitsReceived(const TArray<FSpeckleCommit>& CommitsList);
+
+	//Dropdowns and content structures
+	TSharedPtr<STextComboBox> ManagersCBox;
+	TSharedPtr<STextComboBox> CommitsCBox;
+	TSharedPtr<STextComboBox> BranchesCBox;
+
+	TArray<TSharedPtr<FString>> SpeckleManagerNames;
+	TArray<TSharedPtr<FString>> CommitsCBoxContent;
+	TArray<TSharedPtr<FString>> BranchesCBoxContent;
+
+	TSharedPtr<FString> SelectedBranch;
+
+	//UI handlers
+	FReply ReceiveButtonClicked();
+
+	void OnSpeckleManagersDropdownChanged(TSharedPtr<FString> SelectedName, ESelectInfo::Type InSelectionInfo);
+	void OnBranchesDropdownChanged(TSharedPtr<FString> SelectedName, ESelectInfo::Type InSelectionInfo);
 };

@@ -12,6 +12,8 @@ public:
 
     void Construct(const FArguments& InArgs);
 
+	SCustomComboBox();
+	
 	TSharedPtr<FString> CurrentItem;
 	TArray<TSharedPtr<FString>> ComboOptions;
 

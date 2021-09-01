@@ -55,7 +55,6 @@ void USpeckleRESTHandlerComponent::FetchListOfCommits(const FString& BranchName)
 	
 	if(SpeckleManager)
 	{
-		//FString PostPayload = "{\"query\": \"query{stream (id: \\\"" + SpeckleManager->StreamID + "\\\"){id name commits {totalCount cursor items {id referencedObject authorName message branchName} } }}\"}";
 		FString PostPayload = "{\"query\": \"query{stream (id: \\\"" + SpeckleManager->StreamID + "\\\"){branch(name: \\\"" + BranchName + "\\\"){commits{items {id referencedObject authorName message branchName} } }}}\"}";
 		TFunction<void(FHttpRequestPtr, FHttpResponsePtr , bool)> HandleResponse = [this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 		{ SpeckleManager->OnCommitsItemsResponseReceived(Request, Response, bWasSuccessful); };

@@ -19,6 +19,14 @@ void SCustomComboBox::Construct(const FArguments& InArgs)
     ];
 }
 
+SCustomComboBox::SCustomComboBox()
+{
+#if WITH_ACCESSIBILITY
+	AccessibleBehavior = EAccessibleBehavior::Auto;
+	bCanChildrenBeAccessible = true;
+#endif
+}
+
 FText SCustomComboBox::GetCurrentItemLabel() const
 {
 	if (CurrentItem.IsValid())
