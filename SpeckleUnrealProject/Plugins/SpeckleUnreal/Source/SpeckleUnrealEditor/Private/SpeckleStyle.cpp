@@ -44,6 +44,7 @@ void FSpeckleStyle::Initialize()
 
 	//set UI panel icons and buttons
 	SpeckleStyleSet->Set("Speckle.BranchIcon", new IMAGE_BRUSH(TEXT("branch_64-64"), Icon24x24));
+	SpeckleStyleSet->Set("Speckle.CommitsIcon", new IMAGE_BRUSH(TEXT("branch_64-64"), Icon24x24));
 	SpeckleStyleSet->Set("Speckle.ChangeModeIcon", new IMAGE_BRUSH(TEXT("outline_sync_alt_black_24dp"), Icon32x32));
 	SpeckleStyleSet->Set("Speckle.ReceiveIcon", new IMAGE_BRUSH(TEXT("receiver"), Icon24x24));
 
@@ -51,8 +52,11 @@ void FSpeckleStyle::Initialize()
 	.SetNormal( BOX_BRUSH("outline_sync_alt_black_24dp", FVector2D(32,32 )));
 	// .SetHovered( BOX_BRUSH("outline_sync_alt_black_24dp", FVector2D(32,32), 8.0f/32.0f ) )
 	// .SetPressed( BOX_BRUSH("outline_sync_alt_black_24dp", FVector2D(32,32), 8.0f/32.0f ) );
-
 	SpeckleStyleSet->Set( "Buttons.BranchButtonStyle", BranchBtnStyle);
+
+	const FComboButtonStyle BranchesComboBtnStyle = FComboButtonStyle()
+    .SetDownArrowImage( IMAGE_BRUSH(TEXT("branch_64-64"), Icon24x24));
+	SpeckleStyleSet->Set("ComboBox.BranchCBtnStyle", BranchBtnStyle);
 
 	//Set text style
 	FSlateFontInfo TextStyle = FCoreStyle::Get().GetFontStyle("EmbossedText");
