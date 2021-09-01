@@ -96,19 +96,3 @@ void USpeckleRESTHandlerComponent::FetchListOfBranches()
 	}
 }
 
-void USpeckleRESTHandlerComponent::FetchGlobals(const FString& RefObjectID)
-{
-#if WITH_EDITOR
-	SpeckleManager = Cast<ASpeckleUnrealManager>(GetOwner());
-#endif
-
-	if(SpeckleManager)
-	{
-		FString PostPayload = "{\"query\": \"query{stream (id:\\\"" + SpeckleManager->StreamID + "\\\"){id name description object(id:\\\"" + RefObjectID + "\\\"){id data}}}\"}";
-		TFunction<void(FHttpRequestPtr, FHttpResponsePtr , bool)> HandleResponse = [this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-		{ SpeckleManager->OnGlobalStreamItemsResponseReceived(Request, Response, bWasSuccessful); };
-		
-		SpeckleManager->FetchGlobalItems(PostPayload, RefObjectID);
-	}
-}
-

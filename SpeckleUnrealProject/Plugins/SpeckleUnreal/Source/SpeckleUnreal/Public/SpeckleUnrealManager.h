@@ -121,6 +121,9 @@ public:
 
 	FBranchesRequestProcessed OnBranchesProcessed;
 	FCommitsRequestProcessed OnCommitsProcessed;
+
+	UFUNCTION(BlueprintCallable)
+	void FetchGlobalVariables(const FString& ServerName, const FString& Stream, const FString& Bearer);
 	
 protected:
 

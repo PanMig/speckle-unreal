@@ -35,9 +35,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Speckle REST")
 	virtual void FetchListOfBranches() override;
-
-	UFUNCTION(BlueprintCallable, Category="Speckle REST")
-    virtual void FetchGlobals(const FString& RefObjectID);
 	
 	UPROPERTY()
 	ASpeckleUnrealManager* SpeckleManager;
