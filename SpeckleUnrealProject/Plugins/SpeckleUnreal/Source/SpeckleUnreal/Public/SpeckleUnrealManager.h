@@ -108,6 +108,7 @@ public:
 	TArray<FSpeckleStream> ArrayOfStreams;
 
 	void FetchStreamItems(FString PostPayload, TFunction<void(FHttpRequestPtr, FHttpResponsePtr , bool)> HandleResponse);
+	void FetchGlobalItems(FString PostPayload, const FString& RefObjectID);
 
 	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
 	FBranchesRequestProcessedDyn OnBranchesProcessedDynamic;

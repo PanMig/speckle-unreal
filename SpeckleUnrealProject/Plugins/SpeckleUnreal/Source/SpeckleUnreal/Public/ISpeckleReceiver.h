@@ -28,5 +28,4 @@ public:
 	virtual void FetchListOfCommits(const FString& BranchName) = 0;
 	virtual void FetchListOfStreams() = 0;
 	virtual void FetchListOfBranches() = 0;
-	virtual void FetchGlobals() = 0;
 };
