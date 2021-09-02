@@ -544,11 +544,19 @@ void ASpeckleUnrealManager::FetchGlobalVariables(const FString& ServerName, cons
         {
 	        for(const auto& pair:JsonObject->Values)
 	        {
-                RefObjectID = JsonObject->GetObjectField(TEXT("data"))
+                auto JsonData = JsonObject->GetObjectField(TEXT("data"))
                 ->GetObjectField(TEXT("stream"))
-                ->GetObjectField(TEXT("branch"))
-                ->GetObjectField("commits")
-                ->GetArrayField("items")[0]->AsObject()->GetStringField("referencedObject");
+                ->GetObjectField(TEXT("branch"));
+
+                const TSharedPtr<FJsonObject>* Commits;
+	        	if(!JsonData->TryGetObjectField("commits", Commits))
+	        	{
+	        		OnGlobalsProcessedDynamic.Broadcast(*new FSpeckleGlobals());
+	        		return;
+	        	}
+	        	
+	        	
+				RefObjectID = Commits->Get()->GetArrayField("items")[0]->AsObject()->GetStringField("referencedObject");
                 //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Ref: %s"), *RefObjectID));
 
                 TFunction<void(FHttpRequestPtr, FHttpResponsePtr , bool)> TempResponseHandler = [=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -570,7 +578,10 @@ void ASpeckleUnrealManager::FetchGlobalVariables(const FString& ServerName, cons
 
                            double LatitudeOut = 0.0f;
                            auto Latitude = GlobalObject->TryGetNumberField("Latitude", LatitudeOut);
-                           FSpeckleGlobals Global = FSpeckleGlobals(RefObjectID, RegionOut, static_cast<float>(LatitudeOut),0);
+
+                           double LongitudeOut = 0.0f;
+                           auto longitude = GlobalObject->TryGetNumberField("Longitude", LongitudeOut);
+                           FSpeckleGlobals Global = FSpeckleGlobals(RefObjectID, RegionOut, static_cast<float>(LatitudeOut),static_cast<float>(LongitudeOut));
 		
                            OnGlobalsProcessedDynamic.Broadcast(Global);
                          }
