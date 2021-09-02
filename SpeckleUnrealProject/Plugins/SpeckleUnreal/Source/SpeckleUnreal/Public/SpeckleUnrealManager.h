@@ -28,7 +28,7 @@ class SPECKLEUNREAL_API ASpeckleUnrealManager : public AActor
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBranchesRequestProcessedDyn, const TArray<FSpeckleBranch>&, BranchesList);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCommitsRequestProcessedDyn, const TArray<FSpeckleCommit>&, CommitsList);	
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStreamsRequestProcessedDyn, const TArray<FSpeckleStream>&, StreamsList);	
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGlobalsRequestProcessedDyn, const FSpeckleGlobals&, GlobalsObject);	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGlobalsRequestProcessedDyn, const FSpeckleGlobals&, GlobalsObject, const FString&, StreamID);	
 	
 	DECLARE_MULTICAST_DELEGATE_OneParam(FBranchesRequestProcessed, const TArray<FSpeckleBranch>&);
     DECLARE_MULTICAST_DELEGATE_OneParam(FCommitsRequestProcessed, const TArray<FSpeckleCommit>&);

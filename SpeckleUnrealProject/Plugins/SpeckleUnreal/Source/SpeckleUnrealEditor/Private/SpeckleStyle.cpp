@@ -54,9 +54,10 @@ void FSpeckleStyle::Initialize()
 	// .SetPressed( BOX_BRUSH("outline_sync_alt_black_24dp", FVector2D(32,32), 8.0f/32.0f ) );
 	SpeckleStyleSet->Set( "Buttons.BranchButtonStyle", BranchBtnStyle);
 
+	//Combo button styles
 	const FComboButtonStyle BranchesComboBtnStyle = FComboButtonStyle()
-    .SetDownArrowImage( IMAGE_BRUSH(TEXT("branch_64-64"), Icon24x24));
-	SpeckleStyleSet->Set("ComboBox.BranchCBtnStyle", BranchBtnStyle);
+    .SetDownArrowImage(BOX_BRUSH(TEXT("branch_64-64"), Icon24x24));
+	SpeckleStyleSet->Set("ComboBox.BranchCBtnStyle", BranchesComboBtnStyle);
 
 	//Set text style
 	FSlateFontInfo TextStyle = FCoreStyle::Get().GetFontStyle("EmbossedText");

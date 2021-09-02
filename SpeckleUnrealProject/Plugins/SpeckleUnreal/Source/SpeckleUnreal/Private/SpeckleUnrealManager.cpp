@@ -551,7 +551,7 @@ void ASpeckleUnrealManager::FetchGlobalVariables(const FString& ServerName, cons
                 const TSharedPtr<FJsonObject>* Commits;
 	        	if(!JsonData->TryGetObjectField("commits", Commits))
 	        	{
-	        		OnGlobalsProcessedDynamic.Broadcast(*new FSpeckleGlobals());
+	        		OnGlobalsProcessedDynamic.Broadcast(*new FSpeckleGlobals(), Stream);
 	        		return;
 	        	}
 	        	
@@ -583,7 +583,7 @@ void ASpeckleUnrealManager::FetchGlobalVariables(const FString& ServerName, cons
                            auto longitude = GlobalObject->TryGetNumberField("Longitude", LongitudeOut);
                            FSpeckleGlobals Global = FSpeckleGlobals(RefObjectID, RegionOut, static_cast<float>(LatitudeOut),static_cast<float>(LongitudeOut));
 		
-                           OnGlobalsProcessedDynamic.Broadcast(Global);
+                           OnGlobalsProcessedDynamic.Broadcast(Global, Stream);
                          }
                     }
                 };

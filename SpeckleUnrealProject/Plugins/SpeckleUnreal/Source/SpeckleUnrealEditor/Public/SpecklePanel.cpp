@@ -22,7 +22,7 @@ void SpecklePanel::Construct(const FArguments& InArgs)
 	Init();
 	if(CurrentSpeckleManager == nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("No available Speckle managers")));
+		GEngine->AddOnScreenDebugMessage(-1, 9.0f, FColor::Red, FString::Printf(TEXT("No available Speckle managers, place on in the scene and reopen the window")));
 		return;
 	}
 	
@@ -37,7 +37,7 @@ void SpecklePanel::Construct(const FArguments& InArgs)
 		SpeckleManagerNames.Add(MakeShareable(new FString(SM->GetName())));
 	}
 
-	const auto StreamID = FString(CurrentSpeckleManager->StreamID);		
+	const auto StreamID = FString("Stream id: " + CurrentSpeckleManager->StreamID);		
 	
 	ChildSlot
     [
@@ -129,6 +129,7 @@ TSharedRef<SWidget> SpecklePanel::HorizontalActionsPanel()
         	SAssignNew(BranchesCBox, STextComboBox)
 			.OptionsSource(&BranchesCBoxContent)
 			.OnSelectionChanged(this, &SpecklePanel::OnBranchesDropdownChanged)
+			//.ComboBoxStyle(FSpeckleStyle::Get(), "ComboBox.BranchCBtnStyle")
         ]
 	]
 
@@ -175,6 +176,7 @@ void SpecklePanel::OnBranchesDropdownChanged(TSharedPtr<FString> SelectedName, E
 {
 	SelectedBranch = SelectedName;
 	SpeckleRestHandlerComp->FetchListOfCommits(*SelectedBranch.Get());
+	//CommitsCBox->RefreshOptions();
 }
 
 void SpecklePanel::Init()
