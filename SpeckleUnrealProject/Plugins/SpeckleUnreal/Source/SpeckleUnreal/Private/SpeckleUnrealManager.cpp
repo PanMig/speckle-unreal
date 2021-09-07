@@ -511,6 +511,10 @@ void ASpeckleUnrealManager::DeleteObjects()
 	InProgressSpeckleMeshes.Empty();
 }
 
+/*
+ * Method to fetch globals from a stream. The implementation is not very robust
+ * and is made for testing purposes. Needs refactoring in future iterations
+ */
 void ASpeckleUnrealManager::FetchGlobalVariables(const FString& ServerName, const FString& Stream, const FString& Bearer)
 {
 	FString url = ServerName + "/graphql";

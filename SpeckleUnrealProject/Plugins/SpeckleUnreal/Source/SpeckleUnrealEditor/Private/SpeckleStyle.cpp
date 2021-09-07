@@ -43,8 +43,8 @@ void FSpeckleStyle::Initialize()
 	SpeckleStyleSet->Set("Speckle.MenuIcon", new IMAGE_BRUSH(TEXT("speckle_icon_64_64"), Icon40x40));
 
 	//set UI panel icons and buttons
-	SpeckleStyleSet->Set("Speckle.BranchIcon", new IMAGE_BRUSH(TEXT("branch_64-64"), Icon24x24));
-	SpeckleStyleSet->Set("Speckle.CommitsIcon", new IMAGE_BRUSH(TEXT("branch_64-64"), Icon24x24));
+	SpeckleStyleSet->Set("Speckle.BranchIcon", new IMAGE_BRUSH(TEXT("branch_icon"), Icon24x24));
+	SpeckleStyleSet->Set("Speckle.CommitsIcon", new IMAGE_BRUSH(TEXT("commit_icon"), Icon24x24));
 	SpeckleStyleSet->Set("Speckle.ChangeModeIcon", new IMAGE_BRUSH(TEXT("outline_sync_alt_black_24dp"), Icon32x32));
 	SpeckleStyleSet->Set("Speckle.ReceiveIcon", new IMAGE_BRUSH(TEXT("receiver"), Icon24x24));
 

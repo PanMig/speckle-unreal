@@ -26,10 +26,6 @@ void SpecklePanel::Construct(const FArguments& InArgs)
 		return;
 	}
 	
-	// //set delegates
-	CurrentSpeckleManager->OnBranchesProcessed.AddRaw(this, &SpecklePanel::SpeckleBranchesReceived);
-	CurrentSpeckleManager->OnCommitsProcessed.AddRaw(this, &SpecklePanel::SpeckleCommitsReceived);
-	
 	FetchContent();
 
 	for (auto SM : SpeckleManagers)
@@ -94,6 +90,7 @@ void SpecklePanel::Construct(const FArguments& InArgs)
         ]
 		
 		+ SScrollBox::Slot()
+		.Padding(10)
 		.VAlign(EVerticalAlignment::VAlign_Top)
 		[
 			HorizontalActionsPanel()
@@ -116,38 +113,66 @@ FReply SpecklePanel::ReceiveButtonClicked()
 
 TSharedRef<SWidget> SpecklePanel::HorizontalActionsPanel()
 {		
-	auto HorizontalPanel = SNew(SOverlay)
-	+SOverlay::Slot()
+	auto HorizontalPanel = SNew(SVerticalBox)
+	+SVerticalBox::Slot()
+	.Padding(FMargin(0,0,0,20))
 	.HAlign(EHorizontalAlignment::HAlign_Left)
 	.VAlign(EVerticalAlignment::VAlign_Fill)
-	.Padding(FMargin(10,10,50,10))
 	[
-		SNew(SBox)
-        .WidthOverride(80)
-        .HeightOverride(32)
-        [
-        	SAssignNew(BranchesCBox, STextComboBox)
-			.OptionsSource(&BranchesCBoxContent)
-			.OnSelectionChanged(this, &SpecklePanel::OnBranchesDropdownChanged)
-			//.ComboBoxStyle(FSpeckleStyle::Get(), "ComboBox.BranchCBtnStyle")
-        ]
+		SNew(SHorizontalBox)
+		+SHorizontalBox::Slot()
+		.HAlign(EHorizontalAlignment::HAlign_Left)
+		.VAlign(EVerticalAlignment::VAlign_Fill)
+		[
+			SNew(SImage)
+			.Image(FSpeckleStyle::Get()->GetBrush("Speckle.BranchIcon"))
+		]
+		
+		+SHorizontalBox::Slot()
+		.HAlign(EHorizontalAlignment::HAlign_Left)
+        .VAlign(EVerticalAlignment::VAlign_Fill)
+		[
+			SNew(SBox)
+    		.WidthOverride(120)
+    		.HeightOverride(32)
+    		[
+    			SAssignNew(BranchesCBox, STextComboBox)
+    			.OptionsSource(&BranchesCBoxContent)
+    			.OnSelectionChanged(this, &SpecklePanel::OnBranchesDropdownChanged)
+    		]
+		]
 	]
 
-	+SOverlay::Slot()
+	+SVerticalBox::Slot()
+	.Padding(FMargin(0,0,0,20))
     .HAlign(EHorizontalAlignment::HAlign_Left)
-    .VAlign(EVerticalAlignment::VAlign_Fill)
-	.Padding(FMargin(100,10,50,10))
-    [
-	    SNew(SBox)
-	    .WidthOverride(80)
-	    .HeightOverride(32)
-	    [
-			SAssignNew(CommitsCBox, STextComboBox)
-			.OptionsSource(&CommitsCBoxContent)
-	    ]
+	.VAlign(EVerticalAlignment::VAlign_Fill)
+	[
+		SNew(SHorizontalBox)
+		+SHorizontalBox::Slot()
+		.HAlign(EHorizontalAlignment::HAlign_Left)
+		.VAlign(EVerticalAlignment::VAlign_Fill)
+		[
+			SNew(SImage)
+			.Image(FSpeckleStyle::Get()->GetBrush("Speckle.CommitsIcon"))
+		]
+			
+		+SHorizontalBox::Slot()
+		.HAlign(EHorizontalAlignment::HAlign_Left)
+		.VAlign(EVerticalAlignment::VAlign_Fill)
+		[
+			SNew(SBox)
+			.WidthOverride(120)
+			.HeightOverride(32)
+			[
+				SAssignNew(CommitsCBox, STextComboBox)
+				.OptionsSource(&CommitsCBoxContent)
+			]
+		]
     ]
 	
-    +SOverlay::Slot()
+    +SVerticalBox::Slot()
+	.Padding(FMargin(0,0,0,20))
     .HAlign(EHorizontalAlignment::HAlign_Right)
     .VAlign(EVerticalAlignment::VAlign_Fill)
 	.Padding(FMargin(0,10,0,10))
@@ -167,9 +192,18 @@ void SpecklePanel::OnSpeckleManagersDropdownChanged(TSharedPtr<FString> Selected
 	// Early out if the new selection is the same as the old one
 	check(SelectedName != nullptr);
 
+	//unbind delegates to avoid dangling issues
+	CurrentSpeckleManager->OnBranchesProcessed.RemoveAll(CurrentSpeckleManager);
+	CurrentSpeckleManager->OnCommitsProcessed.RemoveAll(CurrentSpeckleManager);
+
 	const int32 Idx = SpeckleManagerNames.Find(SelectedName);
 	CurrentSpeckleManager = SpeckleManagers[Idx];
-	SpeckleRestHandlerComp = CurrentSpeckleManager->FindComponentByClass<USpeckleRESTHandlerComponent>();
+	if(CurrentSpeckleManager)
+	{
+		SpeckleRestHandlerComp = CurrentSpeckleManager->FindComponentByClass<USpeckleRESTHandlerComponent>();		
+	}
+
+	FetchContent();
 }
 
 void SpecklePanel::OnBranchesDropdownChanged(TSharedPtr<FString> SelectedName, ESelectInfo::Type InSelectionInfo)
@@ -199,17 +233,20 @@ void SpecklePanel::Init()
 			SelectedBranch = MakeShareable(new FString("main"));
 		}
 	}
-	
 }
 
-void SpecklePanel::FetchContent() const
+void SpecklePanel::FetchContent()
 {
-	check(SpeckleRestHandlerComp != nullptr)
+	//set delegates
+	if (CurrentSpeckleManager == nullptr) return;
+
+	CurrentSpeckleManager->OnBranchesProcessed.AddRaw(this, &SpecklePanel::SpeckleBranchesReceived);
+	CurrentSpeckleManager->OnCommitsProcessed.AddRaw(this, &SpecklePanel::SpeckleCommitsReceived);
+
 	if(SpeckleRestHandlerComp == nullptr) return;
 
 	SpeckleRestHandlerComp->FetchListOfBranches();
-	
-	check(SelectedBranch != nullptr)
+
 	SpeckleRestHandlerComp->FetchListOfCommits(*SelectedBranch.Get());
 }
 

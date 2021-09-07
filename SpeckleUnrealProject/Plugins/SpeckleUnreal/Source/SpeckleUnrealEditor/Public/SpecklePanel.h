@@ -23,7 +23,7 @@ private:
 	TSharedRef<SWidget> HorizontalActionsPanel();
 
 	void Init();
-	void FetchContent() const;
+	void FetchContent();
 	
 	template<typename T>
 	UFUNCTION(BlueprintCallable)

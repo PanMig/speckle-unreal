@@ -90,7 +90,6 @@ public:
 	void OnCommitsItemsResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnBranchesItemsResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	void OnStreamItemsResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-	void OnGlobalStreamItemsResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	// Sets default values for this actor's properties
 	ASpeckleUnrealManager();
@@ -108,8 +107,10 @@ public:
 	TArray<FSpeckleStream> ArrayOfStreams;
 
 	void FetchStreamItems(FString PostPayload, TFunction<void(FHttpRequestPtr, FHttpResponsePtr , bool)> HandleResponse);
-	void FetchGlobalItems(FString PostPayload, const FString& RefObjectID);
-
+	
+	UFUNCTION(BlueprintCallable)
+    void FetchGlobalVariables(const FString& ServerName, const FString& Stream, const FString& Bearer);
+	
 	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
 	FBranchesRequestProcessedDyn OnBranchesProcessedDynamic;
 	UPROPERTY(BlueprintAssignable, Category = "SpeckleEvents");
@@ -121,9 +122,6 @@ public:
 
 	FBranchesRequestProcessed OnBranchesProcessed;
 	FCommitsRequestProcessed OnCommitsProcessed;
-
-	UFUNCTION(BlueprintCallable)
-	void FetchGlobalVariables(const FString& ServerName, const FString& Stream, const FString& Bearer);
 	
 protected:
 
