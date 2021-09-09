@@ -139,6 +139,7 @@ TSharedRef<SWidget> SpecklePanel::HorizontalActionsPanel()
     			SAssignNew(BranchesCBox, STextComboBox)
     			.OptionsSource(&BranchesCBoxContent)
     			.OnSelectionChanged(this, &SpecklePanel::OnBranchesDropdownChanged)
+    			.InitiallySelectedItem(MakeShared<FString>(SelectedBranch))
     		]
 		]
 	]
