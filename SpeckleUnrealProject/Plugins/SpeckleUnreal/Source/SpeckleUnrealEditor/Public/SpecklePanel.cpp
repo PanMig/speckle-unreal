@@ -100,9 +100,9 @@ void SpecklePanel::Construct(const FArguments& InArgs)
 SpecklePanel::~SpecklePanel()
 {
 	if(CurrentSpeckleManager == nullptr) return;
+	//unbind delegates to avoid dangling issues
 	CurrentSpeckleManager->OnBranchesProcessed.Clear();
 	CurrentSpeckleManager->OnCommitsProcessed.Clear();
-	SelectedBranch = nullptr;
 }
 
 FReply SpecklePanel::ReceiveButtonClicked()
@@ -193,8 +193,8 @@ void SpecklePanel::OnSpeckleManagersDropdownChanged(TSharedPtr<FString> Selected
 	check(SelectedName != nullptr);
 
 	//unbind delegates to avoid dangling issues
-	CurrentSpeckleManager->OnBranchesProcessed.RemoveAll(CurrentSpeckleManager);
-	CurrentSpeckleManager->OnCommitsProcessed.RemoveAll(CurrentSpeckleManager);
+	CurrentSpeckleManager->OnBranchesProcessed.Clear();
+	CurrentSpeckleManager->OnCommitsProcessed.Clear();
 
 	const int32 Idx = SpeckleManagerNames.Find(SelectedName);
 	CurrentSpeckleManager = SpeckleManagers[Idx];
@@ -202,15 +202,23 @@ void SpecklePanel::OnSpeckleManagersDropdownChanged(TSharedPtr<FString> Selected
 	{
 		SpeckleRestHandlerComp = CurrentSpeckleManager->FindComponentByClass<USpeckleRESTHandlerComponent>();		
 	}
+
 	SelectedBranch = FString("main");
 	FetchContent();
 }
 
 void SpecklePanel::OnBranchesDropdownChanged(TSharedPtr<FString> SelectedName, ESelectInfo::Type InSelectionInfo)
 {
-	SelectedBranch = *(SelectedName.Get());
+	if (SelectedName.IsValid()) 
+	{
+		SelectedBranch = *SelectedName.Get();
+	}
+	else 
+	{
+		SelectedBranch = FString("Main");
+	}
 	SpeckleRestHandlerComp->FetchListOfCommits(SelectedBranch);
-	CommitsCBox->RefreshOptions();
+	//CommitsCBox->RefreshOptions();
 }
 
 void SpecklePanel::Init()
@@ -230,7 +238,7 @@ void SpecklePanel::Init()
 			CurrentSpeckleManager = SpeckleManagers[0];
 			SpeckleRestHandlerComp = CurrentSpeckleManager->FindComponentByClass<USpeckleRESTHandlerComponent>();
 
-			SelectedBranch =  FString("main");
+			SelectedBranch = FString("main");
 		}
 	}
 }
@@ -250,18 +258,26 @@ void SpecklePanel::FetchContent()
 
 void SpecklePanel::SpeckleBranchesReceived(const TArray<FSpeckleBranch>& BranchesList)
 {
-	BranchesCBoxContent.Empty();
+	if(BranchesCBoxContent.Num() > 0)
+	{
+		BranchesCBoxContent.Empty();
+	}
+	
 	for(auto B : BranchesList)
 	{
 		BranchesCBoxContent.Add(MakeShareable(new FString(B.Name)));
 	}
+	
 	BranchesCBox->RefreshOptions();
 }
 
 void SpecklePanel::SpeckleCommitsReceived(const TArray<FSpeckleCommit>& CommitsList)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%d"), CommitsList.Num());
-	CommitsCBoxContent.Empty();		
+	if(CommitsCBoxContent.Num() > 0)
+	{
+		CommitsCBoxContent.Empty();
+	}
+	
 	for(auto C : CommitsList)
 	{
 		CommitsCBoxContent.Add(MakeShareable(new FString(C.Message + " [" + C.AuthorName + "]")));

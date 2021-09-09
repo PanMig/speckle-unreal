@@ -28,7 +28,7 @@ public:
 	virtual void ImportSpeckleObject(int CurrIndex) override;
 	
 	UFUNCTION(BlueprintCallable, Category="Speckle REST")
-	virtual void FetchListOfCommits(const FString& BranchName) override;
+	virtual void FetchListOfCommits(const FString BranchName) override;
 
 	UFUNCTION(BlueprintCallable, Category="Speckle REST")
 	virtual void FetchListOfStreams() override;

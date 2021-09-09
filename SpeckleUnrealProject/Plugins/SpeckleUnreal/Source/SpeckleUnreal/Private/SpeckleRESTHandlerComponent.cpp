@@ -46,7 +46,7 @@ void USpeckleRESTHandlerComponent::ImportSpeckleObject(int CurrIndex)
 	}
 }
 
-void USpeckleRESTHandlerComponent::FetchListOfCommits(const FString& BranchName)
+void USpeckleRESTHandlerComponent::FetchListOfCommits(const FString BranchName)
 {
 	
 #if WITH_EDITOR
