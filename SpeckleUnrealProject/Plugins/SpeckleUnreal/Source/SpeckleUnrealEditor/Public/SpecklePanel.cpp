@@ -12,7 +12,6 @@ struct FSpeckleCommit;
 
 #define LOCTEXT_NAMESPACE "SpecklePanel"
 
-//const auto TextStyle = FSpeckleStyle::Get()->GetFontStyle("Speckle.DefaultText");
 FSlateFontInfo TextStyle = FCoreStyle::Get().GetFontStyle("EmbossedText");
 
 void SpecklePanel::Construct(const FArguments& InArgs)
@@ -103,6 +102,7 @@ SpecklePanel::~SpecklePanel()
 	if(CurrentSpeckleManager == nullptr) return;
 	CurrentSpeckleManager->OnBranchesProcessed.Clear();
 	CurrentSpeckleManager->OnCommitsProcessed.Clear();
+	SelectedBranch = nullptr;
 }
 
 FReply SpecklePanel::ReceiveButtonClicked()
@@ -202,15 +202,15 @@ void SpecklePanel::OnSpeckleManagersDropdownChanged(TSharedPtr<FString> Selected
 	{
 		SpeckleRestHandlerComp = CurrentSpeckleManager->FindComponentByClass<USpeckleRESTHandlerComponent>();		
 	}
-
+	SelectedBranch = FString("main");
 	FetchContent();
 }
 
 void SpecklePanel::OnBranchesDropdownChanged(TSharedPtr<FString> SelectedName, ESelectInfo::Type InSelectionInfo)
 {
-	SelectedBranch = SelectedName;
-	SpeckleRestHandlerComp->FetchListOfCommits(*SelectedBranch.Get());
-	//CommitsCBox->RefreshOptions();
+	SelectedBranch = *(SelectedName.Get());
+	SpeckleRestHandlerComp->FetchListOfCommits(SelectedBranch);
+	CommitsCBox->RefreshOptions();
 }
 
 void SpecklePanel::Init()
@@ -230,24 +230,22 @@ void SpecklePanel::Init()
 			CurrentSpeckleManager = SpeckleManagers[0];
 			SpeckleRestHandlerComp = CurrentSpeckleManager->FindComponentByClass<USpeckleRESTHandlerComponent>();
 
-			SelectedBranch = MakeShareable(new FString("main"));
+			SelectedBranch =  FString("main");
 		}
 	}
 }
 
 void SpecklePanel::FetchContent()
 {
-	//set delegates
+	// set delegates
 	if (CurrentSpeckleManager == nullptr) return;
-
 	CurrentSpeckleManager->OnBranchesProcessed.AddRaw(this, &SpecklePanel::SpeckleBranchesReceived);
 	CurrentSpeckleManager->OnCommitsProcessed.AddRaw(this, &SpecklePanel::SpeckleCommitsReceived);
-
+	
+	// Fetch commits and braches
 	if(SpeckleRestHandlerComp == nullptr) return;
-
 	SpeckleRestHandlerComp->FetchListOfBranches();
-
-	SpeckleRestHandlerComp->FetchListOfCommits(*SelectedBranch.Get());
+	SpeckleRestHandlerComp->FetchListOfCommits(SelectedBranch);
 }
 
 void SpecklePanel::SpeckleBranchesReceived(const TArray<FSpeckleBranch>& BranchesList)

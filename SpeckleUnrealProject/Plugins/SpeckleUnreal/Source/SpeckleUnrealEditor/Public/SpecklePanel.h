@@ -56,7 +56,7 @@ private:
 	TArray<TSharedPtr<FString>> CommitsCBoxContent;
 	TArray<TSharedPtr<FString>> BranchesCBoxContent;
 
-	TSharedPtr<FString> SelectedBranch;
+	FString SelectedBranch;
 
 	//UI handlers
 	FReply ReceiveButtonClicked();
